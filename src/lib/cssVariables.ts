@@ -3,7 +3,7 @@ export interface CSSVariable {
   label: string;
   type: 'color' | 'size' | 'text';
   defaultValue: string;
-  category: 'colors' | 'header' | 'messages' | 'toggle' | 'typography' | 'animation' | 'layout' | 'footer' | 'welcome';
+  category: 'colors' | 'header' | 'messages' | 'toggle' | 'typography' | 'animation' | 'layout' | 'footer' | 'welcome' | 'quick-actions';
   description?: string;
   excludeFromUI?: boolean;
   min?: number;
@@ -351,19 +351,19 @@ export const cssVariables: CSSVariable[] = [
   // Toggle Button
   {
     name: '--chat--welcome-pill-icon-color',
-    label: 'Welcome Pill Icon Color',
+    label: 'Quick Action Icon Color',
     type: 'color',
-    defaultValue: '#101330', // Default dark color
-    category: 'welcome',
-    description: 'Color of the arrow icon in welcome pills'
+    defaultValue: '#101330',
+    category: 'quick-actions',
+    description: 'Color of the arrow icon in quick action pills'
   },
   {
     name: '--chat--welcome-pill-icon-hover-color',
-    label: 'Welcome Pill Icon Hover Color',
+    label: 'Quick Action Icon Hover Color',
     type: 'color',
-    defaultValue: '#e74266', // Default primary color
-    category: 'welcome',
-    description: 'Color of the arrow icon in welcome pills on hover'
+    defaultValue: '#e74266',
+    category: 'quick-actions',
+    description: 'Color of the arrow icon in quick action pills on hover'
   },
   {
     name: '--chat--toggle--background',

@@ -3,69 +3,79 @@ import { ControlPanel } from '@/components/ControlPanel';
 import { ChatPreview } from '@/components/ChatPreview';
 import { getDefaultValues } from '@/lib/cssVariables';
 import type { LogoValues, HeaderContent, WelcomeConfig, ChatConfig } from '@/lib/types';
-import { v4 as uuidv4 } from 'uuid';
+import { toast } from 'sonner';
 
 const STORAGE_KEY = 'n8n-chat-widget-config';
 
-const Index = () => {
-  // Initialize state from localStorage or defaults
-  const [initialized, setInitialized] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+const DEFAULT_LOGOS: LogoValues = {
+  headerLogo: null,
+  toggleIcon: null,
+  botAvatar: null,
+};
 
-  const [cssValues, setCssValues] = useState<Record<string, string>>(getDefaultValues);
-  const [logos, setLogos] = useState<LogoValues>({
-    headerLogo: null,
-    toggleIcon: null,
-    botAvatar: null,
-  });
-  const [headerContent, setHeaderContent] = useState<HeaderContent>({
-    title: 'Hi there! 👋',
-    subtitle: "Start a chat. We're here to help you 24/7.",
-  });
-  const [welcomeConfig, setWelcomeConfig] = useState<WelcomeConfig>({
+const DEFAULT_HEADER_CONTENT: HeaderContent = {
+  title: 'Hi there! 👋',
+  subtitle: "Start a chat. We're here to help you 24/7.",
+};
+
+const DEFAULT_CHAT_CONFIG: ChatConfig = {
+  webhookUrl: '',
+};
+
+function getDefaultWelcomeConfig(): WelcomeConfig {
+  return {
     enabled: true,
     title: 'Hello! 👋',
     subtitle: 'How can we help you today?',
     pills: [
-      { id: '1', label: 'Product Pricing', message: 'I would like to know about pricing.' },
-      { id: '2', label: 'Technical Support', message: 'I need technical support.' },
-    ]
-  });
-  const [chatConfig, setChatConfig] = useState<ChatConfig>({
-    webhookUrl: '',
-  });
+      { id: crypto.randomUUID(), label: 'Product Pricing', message: 'I would like to know about pricing.' },
+      { id: crypto.randomUUID(), label: 'Technical Support', message: 'I need technical support.' },
+    ],
+  };
+}
 
-  // Load from storage on mount
-  useEffect(() => {
+function loadFromStorage<T>(key: string, fallback: T): T {
+  try {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.cssValues) setCssValues(parsed.cssValues);
-        if (parsed.logos) setLogos(parsed.logos);
-        if (parsed.headerContent) setHeaderContent(parsed.headerContent);
-        if (parsed.welcomeConfig) setWelcomeConfig(parsed.welcomeConfig);
-        if (parsed.chatConfig) setChatConfig(parsed.chatConfig);
-      } catch (e) {
-        console.error('Failed to load chat config', e);
-      }
+      const parsed = JSON.parse(saved);
+      if (parsed[key] !== undefined) return parsed[key] as T;
     }
-    setInitialized(true);
-  }, []);
+  } catch {
+    // Corrupt storage — fall through to default
+  }
+  return fallback;
+}
+
+const Index = () => {
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const [cssValues, setCssValues] = useState<Record<string, string>>(
+    () => loadFromStorage('cssValues', getDefaultValues())
+  );
+  const [logos, setLogos] = useState<LogoValues>(
+    () => loadFromStorage('logos', DEFAULT_LOGOS)
+  );
+  const [headerContent, setHeaderContent] = useState<HeaderContent>(
+    () => loadFromStorage('headerContent', DEFAULT_HEADER_CONTENT)
+  );
+  const [welcomeConfig, setWelcomeConfig] = useState<WelcomeConfig>(
+    () => loadFromStorage('welcomeConfig', getDefaultWelcomeConfig())
+  );
+  const [chatConfig, setChatConfig] = useState<ChatConfig>(
+    () => loadFromStorage('chatConfig', DEFAULT_CHAT_CONFIG)
+  );
 
   // Save to storage on change
   useEffect(() => {
-    if (!initialized) return;
-
-    const config = {
-      cssValues,
-      logos,
-      headerContent,
-      welcomeConfig,
-      chatConfig,
-    };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
-  }, [cssValues, logos, headerContent, welcomeConfig, chatConfig, initialized]);
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ cssValues, logos, headerContent, welcomeConfig, chatConfig }));
+    } catch (e) {
+      if (e instanceof DOMException && e.name === 'QuotaExceededError') {
+        toast.error('Config not saved — storage limit exceeded. Try using image URLs instead of uploaded files.');
+      }
+    }
+  }, [cssValues, logos, headerContent, welcomeConfig, chatConfig]);
 
   const handleChange = useCallback((name: string, value: string) => {
     setCssValues((prev) => ({ ...prev, [name]: value }));
@@ -73,18 +83,10 @@ const Index = () => {
 
   const handleReset = useCallback(() => {
     setCssValues(getDefaultValues());
-    setLogos({ headerLogo: null, toggleIcon: null, botAvatar: null });
-    setHeaderContent({ title: 'Hi there! 👋', subtitle: "Start a chat. We're here to help you 24/7." });
-    setWelcomeConfig({
-      enabled: true,
-      title: 'Hello! 👋',
-      subtitle: 'How can we help you today?',
-      pills: [
-        { id: uuidv4(), label: 'Product Pricing', message: 'I would like to know about pricing.' },
-        { id: uuidv4(), label: 'Technical Support', message: 'I need technical support.' },
-      ]
-    });
-    setChatConfig({ webhookUrl: '' });
+    setLogos(DEFAULT_LOGOS);
+    setHeaderContent(DEFAULT_HEADER_CONTENT);
+    setWelcomeConfig(getDefaultWelcomeConfig());
+    setChatConfig(DEFAULT_CHAT_CONFIG);
     localStorage.removeItem(STORAGE_KEY);
     setRefreshKey(prev => prev + 1);
   }, []);
@@ -110,13 +112,8 @@ const Index = () => {
     setChatConfig(config);
   }, []);
 
-  if (!initialized) {
-    return null; // Or a loading spinner
-  }
-
   return (
     <div className="h-screen w-screen flex overflow-hidden">
-      {/* Control Panel */}
       <div className="w-[380px] shrink-0 border-r border-border">
         <ControlPanel
           values={cssValues}
@@ -134,7 +131,6 @@ const Index = () => {
         />
       </div>
 
-      {/* Preview */}
       <div className="flex-1 min-w-0">
         <ChatPreview
           key={refreshKey}

@@ -9,15 +9,30 @@ interface GeneratorProps {
   chatConfig: ChatConfig;
 }
 
+// Escapes a string for safe embedding inside a JS single-quoted string literal
+// inside a <script> tag. Handles quotes, backslashes, newlines, and the
+// </script> sequence that would prematurely terminate the tag.
+function escapeForJS(str: string): string {
+  return str
+    .replace(/\\/g, '\\\\')
+    .replace(/'/g, "\\'")
+    .replace(/\r?\n/g, '\\n')
+    .replace(/\r/g, '\\n')
+    .replace(/<\/script/gi, '<\\/script');
+}
+
+// Escapes a string for safe embedding inside a CSS url() or string value.
+function escapeForCSS(str: string): string {
+  return str.replace(/'/g, "\\'").replace(/\)/g, '\\)');
+}
+
 export const generateEmbedCode = ({ cssValues, headerContent, welcomeConfig, logos, chatConfig }: GeneratorProps) => {
   const css = generateCSS(cssValues);
 
-  // Escape strings for JS safety
-  const safeTitle = welcomeConfig.title.replace(/'/g, "\\'");
-  const safeSubtitle = welcomeConfig.subtitle.replace(/'/g, "\\'");
-
-  const safeHeaderTitle = headerContent.title.replace(/'/g, "\\'");
-  const safeHeaderSubtitle = headerContent.subtitle.replace(/'/g, "\\'");
+  const safeTitle = escapeForJS(welcomeConfig.title);
+  const safeSubtitle = escapeForJS(welcomeConfig.subtitle);
+  const safeHeaderTitle = escapeForJS(headerContent.title);
+  const safeHeaderSubtitle = escapeForJS(headerContent.subtitle);
 
   // Format the webhook URL - ensure it has a value or use placeholder
   const webhookUrl = chatConfig.webhookUrl || 'YOUR_WEBHOOK_URL';
@@ -260,7 +275,7 @@ export const generateEmbedCode = ({ cssValues, headerContent, welcomeConfig, log
   ${logos.botAvatar ? `
   .n8n-chat-message-container[data-is-bot="true"] .n8n-chat-message-avatar,
   .chat-message-bot-avatar {
-      background-image: url('${logos.botAvatar}') !important;
+      background-image: url('${logos.botAvatar ? escapeForCSS(logos.botAvatar) : ''}') !important;
       background-size: cover !important;
       background-position: center !important;
       color: transparent !important; /* Hide default SVG/text */
@@ -331,12 +346,6 @@ export const generateEmbedCode = ({ cssValues, headerContent, welcomeConfig, log
                          || chatContainer.querySelector('[class*="history"]')
                          || chatContainer.querySelector('div:not([class]) > div[class*="message"]')?.parentNode; // Deep fallback
         
-        if (messageList) {
-             const messages = messageList.querySelectorAll('.n8n-chat-message-container, .chat-message');
-             if (messages.length > 0 && !welcomeHidden) {
-             }
-        }
-        
         // Robust Injection: Check if element exists in DOM (handling React re-renders)
         if (chatWindow && !chatWindow.querySelector('.n8n-chat-welcome-container') && !welcomeHidden) {
             renderWelcomeScreen(chatWindow);
@@ -385,9 +394,9 @@ export const generateEmbedCode = ({ cssValues, headerContent, welcomeConfig, log
                } else if (!logoConfig.toggleIcon && !toggle.dataset.hasLucideIcon) {
                    // Inject Lucide Icon (Only if closed?)
                    // Check if window is open
-                   const window = chatContainer.querySelector('.chat-window') || document.querySelector('.chat-window');
-                   const isOpen = window && (window.style.display !== 'none' && window.style.opacity !== '0');
-                   
+                   const chatWin = chatContainer.querySelector('.chat-window') || document.querySelector('.chat-window');
+                   const isOpen = chatWin && (chatWin.style.display !== 'none' && chatWin.style.opacity !== '0');
+
                    if (!isOpen && !toggle.innerHTML.includes('lucide')) {
                         toggle.dataset.hasLucideIcon = 'true';
                         toggle.innerHTML = LUCIDE_ICON_CHAT;
@@ -498,7 +507,6 @@ export const generateEmbedCode = ({ cssValues, headerContent, welcomeConfig, log
 
   function renderWelcomeScreen(container) {
     if (welcomeHidden) return;
-    const pills = ${safePills};
 
     const wrapper = document.createElement('div');
     wrapper.className = 'n8n-chat-welcome-container';
@@ -549,7 +557,14 @@ export const generateEmbedCode = ({ cssValues, headerContent, welcomeConfig, log
           if(svg) svg.style.color = 'var(--chat--welcome-pill-icon-color, #101330)';
       };
 
-      btn.innerHTML = '<span style="font-weight: 500;">' + pill.label + '</span> ' + LUCIDE_ICON_SEND;
+      const labelSpan = document.createElement('span');
+      labelSpan.style.fontWeight = '500';
+      labelSpan.textContent = pill.label;
+      btn.appendChild(labelSpan);
+
+      const iconWrapper = document.createElement('span');
+      iconWrapper.innerHTML = LUCIDE_ICON_SEND;
+      btn.appendChild(iconWrapper);
 
   const svg = btn.querySelector('svg');
   if (svg) {

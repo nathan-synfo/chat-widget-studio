@@ -51,15 +51,27 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
   }, [cssValues]);
 
   return (
-    <div className="h-full w-full flex items-center justify-center bg-muted/30 relative overflow-hidden">
-      {/* Background pattern */}
+    <div className="h-full w-full flex items-center justify-center bg-background relative overflow-hidden">
+      {/* Background dot pattern */}
       <div
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-[0.08]"
         style={{
           backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
           backgroundSize: '24px 24px'
         }}
       />
+      {/* Radial vignette */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, hsl(220,20%,10%) 100%)'
+        }}
+      />
+      {/* Live Preview label */}
+      <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10 pointer-events-none">
+        <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" />
+        <span className="text-[10px] font-medium text-muted-foreground/60 tracking-widest uppercase select-none">Live Preview</span>
+      </div>
 
       {/* Preview container - Acts as the "Viewport" */}
       <div
@@ -145,7 +157,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                       <button
                         key={pill.id}
                         className="text-left text-xs py-2 px-3 rounded-lg transition-all border shadow-sm hover:shadow-md flex items-center justify-between gap-2 group bg-white max-w-[85%]"
-                        onClick={() => handlePillClick(pill.label)}
+                        onClick={() => handlePillClick(pill.message)}
                         style={{
                           borderColor: 'var(--chat--color-light-shade-50, #eee)',
                           color: 'var(--chat--color-dark)'

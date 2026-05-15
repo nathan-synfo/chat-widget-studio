@@ -15,13 +15,13 @@ import { cssVariables, categoryLabels, generateCSS, parseCSS, getDefaultValues }
 import { generateShades } from '@/lib/colorUtils';
 import { themes } from '@/lib/themes';
 import { generateEmbedCode } from '@/lib/codeGenerator';
-import { Settings, Download, RotateCcw, Image, MessageSquare, Palette, Code, Link, Upload, FileCode, FileText, Info, Ruler, MousePointerClick, Move, Copy, Check, Type, Sparkles, PanelBottom } from 'lucide-react';
+import { Settings, Download, RotateCcw, MessageSquare, Palette, Code, Upload, FileText, Info, Ruler, MousePointerClick, Move, Copy, Check, Type, Sparkles, PanelBottom, Zap } from 'lucide-react';
 import { toast } from 'sonner';
 import type { LogoValues, HeaderContent, WelcomeConfig, ChatConfig } from '@/lib/types';
 import { Switch } from '@/components/ui/switch';
 import { Slider } from '@/components/ui/slider';
 import { Plus, Trash2 } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -74,6 +74,7 @@ export function ControlPanel({
     'typography',
     'layout',
     'welcome',
+    'quick-actions',
     'header',
     'messages',
     'footer',
@@ -232,7 +233,7 @@ export function ControlPanel({
       toast.error('Maximum 4 pills allowed');
       return;
     }
-    const newPills = [...welcomeConfig.pills, { id: uuidv4(), label: 'New Action', message: 'Hello' }];
+    const newPills = [...welcomeConfig.pills, { id: crypto.randomUUID(), label: 'New Action', message: 'Hello' }];
     onWelcomeChange({ ...welcomeConfig, pills: newPills });
   };
 
@@ -244,16 +245,18 @@ export function ControlPanel({
 
   return (
     <div className="h-full flex flex-col bg-card">
-      <div className="p-4 border-b border-border bg-panel-header">
-        <h1 className="text-lg font-semibold text-foreground mb-1">
-          n8n Chat Customizer <span className="ml-2 text-[10px] items-center justify-center rounded-full bg-green-500/10 px-2 py-0.5 font-medium text-green-500 shadow-[0_0_10px_2px_rgba(34,197,94,0.4)] ring-1 ring-inset ring-green-500/20">Beta</span>
-        </h1>
-        <p className="text-xs text-muted-foreground">
-          Customize and export your chat widget styles
-        </p>
+      <div className="px-4 pt-3.5 pb-3 border-b border-border bg-panel-header relative overflow-hidden">
+        <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
+        <div className="flex items-center gap-2.5 mb-1">
+          <div className="w-6 h-6 rounded-md bg-primary/15 border border-primary/25 flex items-center justify-center shrink-0">
+            <MessageSquare className="h-3.5 w-3.5 text-primary" />
+          </div>
+          <span className="text-sm font-semibold text-foreground tracking-tight">n8n Chat Studio</span>
+        </div>
+        <p className="text-xs text-muted-foreground pl-8">Customize and export your chat widget</p>
       </div>
 
-      <div className="p-3 border-b border-border space-y-3">
+      <div className="p-3 border-b border-border space-y-3 bg-muted/20">
         {/* Theme Selector */}
         <div className="space-y-1.5">
           <Label className="text-xs font-medium text-muted-foreground">Theme Preset</Label>
@@ -325,10 +328,10 @@ export function ControlPanel({
               <Button
                 variant="default"
                 size="sm"
-                className="flex-1 text-xs bg-black hover:bg-zinc-800 text-white"
+                className="flex-1 text-xs font-medium shadow-sm shadow-primary/20"
               >
                 <Code className="w-3.5 h-3.5 mr-1.5" />
-                Get Code
+                Get Embed Code
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-[800px] max-h-[85vh] overflow-y-auto p-6 pr-12 md:p-8 md:pr-16">
@@ -408,9 +411,11 @@ export function ControlPanel({
             if (sectionId === 'config') {
               return (
                 <AccordionItem key="config" value="config" className="border-border">
-                  <AccordionTrigger className="px-4">
-                    <div className="flex items-center gap-3">
-                      <Settings className="h-4 w-4" />
+                  <AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors data-[state=open]:bg-muted/30">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded flex items-center justify-center bg-secondary text-muted-foreground shrink-0">
+                        <Settings className="h-3.5 w-3.5" />
+                      </div>
                       <span>Configuration</span>
                     </div>
                   </AccordionTrigger>
@@ -439,9 +444,11 @@ export function ControlPanel({
             if (sectionId === 'welcome') {
               return (
                 <AccordionItem key="welcome" value="welcome" className="border-border">
-                  <AccordionTrigger className="px-4">
-                    <div className="flex items-center gap-3">
-                      <MessageSquare className="h-4 w-4" />
+                  <AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors data-[state=open]:bg-muted/30">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded flex items-center justify-center bg-secondary text-muted-foreground shrink-0">
+                        <MessageSquare className="h-3.5 w-3.5" />
+                      </div>
                       <span>Welcome Screen</span>
                     </div>
                   </AccordionTrigger>
@@ -539,49 +546,6 @@ export function ControlPanel({
                               ))}
                           </div>
 
-                          <div className="space-y-3 pt-4 border-t border-border/50">
-                            <div className="flex items-center justify-between">
-                              <Label className="text-xs font-medium text-muted-foreground">Quick Action Pills</Label>
-                              <Button variant="ghost" size="sm" onClick={handleAddPill} className="h-6 w-6 p-0">
-                                <Plus className="h-4 w-4" />
-                              </Button>
-                            </div>
-
-                            <div className="space-y-3">
-                              {welcomeConfig.pills.map((pill) => (
-                                <div key={pill.id} className="bg-muted/50 p-2 rounded-md space-y-2 relative group">
-                                  <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                    <Button
-                                      variant="ghost"
-                                      size="sm"
-                                      onClick={() => handleRemovePill(pill.id)}
-                                      className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
-                                    >
-                                      <Trash2 className="h-3.5 w-3.5" />
-                                    </Button>
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] text-muted-foreground">Label</Label>
-                                    <Input
-                                      value={pill.label}
-                                      onChange={(e) => handlePillChange(pill.id, 'label', e.target.value)}
-                                      className="h-7 text-xs"
-                                      placeholder="Button Text"
-                                    />
-                                  </div>
-                                  <div className="space-y-1">
-                                    <Label className="text-[10px] text-muted-foreground">Message Payload</Label>
-                                    <Input
-                                      value={pill.message}
-                                      onChange={(e) => handlePillChange(pill.id, 'message', e.target.value)}
-                                      className="h-7 text-xs"
-                                      placeholder="Message sent to bot"
-                                    />
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
                         </>
                       )}
                     </div>
@@ -590,15 +554,96 @@ export function ControlPanel({
               );
             }
 
-            // 3. STANDARD CATEGORIES
+            // 3. QUICK ACTIONS (Special Case)
+            if (sectionId === 'quick-actions') {
+              return (
+                <AccordionItem key="quick-actions" value="quick-actions" className="border-border">
+                  <AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors data-[state=open]:bg-muted/30">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-6 h-6 rounded flex items-center justify-center bg-secondary text-muted-foreground shrink-0">
+                        <Zap className="h-3.5 w-3.5" />
+                      </div>
+                      <span>Quick Actions</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="space-y-3 pb-2">
+                      {!welcomeConfig.enabled && (
+                        <p className="text-xs text-muted-foreground/70 bg-muted/40 rounded px-2.5 py-2 mb-1">
+                          Enable the Welcome Screen to show these buttons to visitors.
+                        </p>
+                      )}
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-muted-foreground">Pills (max 4)</Label>
+                        <Button variant="ghost" size="sm" onClick={handleAddPill} className="h-6 w-6 p-0">
+                          <Plus className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="space-y-3">
+                        {welcomeConfig.pills.map((pill) => (
+                          <div key={pill.id} className="bg-secondary/60 border border-border p-2.5 rounded-md space-y-2 relative group">
+                            <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleRemovePill(pill.id)}
+                                className="h-6 w-6 p-0 text-destructive hover:text-destructive hover:bg-destructive/10"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] text-muted-foreground">Label</Label>
+                              <Input
+                                value={pill.label}
+                                onChange={(e) => handlePillChange(pill.id, 'label', e.target.value)}
+                                className="h-7 text-xs"
+                                placeholder="Button Text"
+                              />
+                            </div>
+                            <div className="space-y-1">
+                              <Label className="text-[10px] text-muted-foreground">Message Payload</Label>
+                              <Input
+                                value={pill.message}
+                                onChange={(e) => handlePillChange(pill.id, 'message', e.target.value)}
+                                className="h-7 text-xs"
+                                placeholder="Message sent to bot"
+                              />
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="space-y-2 pt-3 border-t border-border/50">
+                        {cssVariables
+                          .filter((v) => v.category === 'quick-actions' && v.type === 'color')
+                          .map((variable) => (
+                            <div key={variable.name}>
+                              <ColorInput
+                                label={variable.label}
+                                value={values[variable.name] || variable.defaultValue}
+                                onChange={(value) => handleValueChange(variable.name, value)}
+                                variableName={variable.name}
+                              />
+                            </div>
+                          ))}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              );
+            }
+
+            // 4. STANDARD CATEGORIES
             // Treat 'sectionId' as 'category'
             const category = sectionId;
 
             return (
               <AccordionItem key={category} value={category} className="border-border">
-                <AccordionTrigger className="px-4">
-                  <div className="flex items-center gap-3">
-                    {getCategoryIcon(category)}
+                <AccordionTrigger className="px-4 hover:bg-muted/50 transition-colors data-[state=open]:bg-muted/30">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-6 h-6 rounded flex items-center justify-center bg-secondary text-muted-foreground shrink-0">
+                      {getCategoryIcon(category)}
+                    </div>
                     <span>{categoryLabels[category]}</span>
                   </div>
                 </AccordionTrigger>
