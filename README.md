@@ -4,30 +4,31 @@
 
 ![](https://github.com/nathan-synfo/chat-widget-studio/blob/main/overview.gif)
 
-# n8n Chat Widget Studio
+# n8n Chat Studio
 
 A powerful, visual builder for the n8n Chat Widget, enabling users to customize, preview, and generate embed codes for their AI chatbots without writing code.
-
-![n8n Chat Widget Studio](https://raw.githubusercontent.com/n8n-io/n8n/master/assets/n8n-logo.png) <!-- Replace with actual screenshot if available -->
 
 ## 🚀 Features
 
 ### Visual Customization
--   **Real-time Preview**: See your changes instantly as you configure the widget.
--   **Theming**: Select from a range of starter themes or manually select the colors to match your branding.
--   **Typography**: distinct controls for Global font family with automatic Google Fonts integration.
--   **Header Styling**: Adjust prompts, icons, and layout.
--   **Message Styling**: Cusomize message bubbles, colors and layout.
--   **Toggle**: Customize the chat bubble icon and position.
+-   **Live Preview**: See your changes instantly as you configure the widget, with a real-time canvas showing the widget exactly as it will appear.
+-   **Theming**: Select from a range of starter themes or manually pick colours to match your branding.
+-   **Typography**: Global font family selector with automatic Google Fonts integration and custom font support.
+-   **Header Styling**: Adjust title, subtitle, logo, and layout.
+-   **Message Styling**: Customize message bubbles, colours, padding, and typography.
+-   **Toggle Button**: Customize the chat bubble icon, size, and position.
+-   **Footer & Input**: Control the input area, send button, and spacing.
+-   **Animation**: Choose from multiple entry/exit animations and control the speed.
+-   **Window Layout**: Set widget dimensions, position offset, and border radius.
 
 ### Configuration
--   **Webhook Configuration**: Easily connect your n8n workflow webhook URL.
--   **Welcome Screen**: Create a welcome screen with a Title, Subtitle and Quick Action pills.
--   **Animation**: Choose from different animations and control the animation speed.
+-   **Webhook Configuration**: Connect your n8n workflow webhook URL.
+-   **Welcome Screen**: Create a welcome screen with a custom title, subtitle, and colour controls.
+-   **Quick Actions**: Define up to 4 quick-action pills shown on the welcome screen — each with a visible label and a separate message payload sent to the bot.
+-   **Import/Export CSS**: Save and reload your theme as a `.css` file.
 
 ### Easy Export
--   **One-Click Copy**: Instantly generate and copy the installation code.
--   **Import/Export CSS**: Export and Import existing CSS stylings.
+-   **Get Embed Code**: Instantly generate and copy the full installation snippet — includes the stylesheet link, scoped CSS variables, and the n8n Chat script — ready to paste before your `</body>` tag.
 
 ## 🛠️ Technology Stack
 
