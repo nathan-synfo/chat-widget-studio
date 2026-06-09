@@ -26,7 +26,15 @@ export function InputSection() {
       {v('--chat--spacing')}
 
       <Subsection>Colors</Subsection>
-      <FieldGrid cols={2}>{v('--chat--input--border-color')}</FieldGrid>
+      <FieldGrid cols={2}>
+        {v('--chat--input--border-color')}
+        <VarField
+          name="--chat--color-typing"
+          value={values['--chat--color-typing']}
+          onChange={(val) => setVar('--chat--color-typing', val)}
+          hint="Colour of the animated 'typing' dots shown in the bot's bubble before its reply arrives. Not visible in this static preview."
+        />
+      </FieldGrid>
     </SectionShell>
   );
 }

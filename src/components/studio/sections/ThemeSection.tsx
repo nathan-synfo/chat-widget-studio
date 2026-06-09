@@ -5,12 +5,8 @@ import { applyTheme } from '@/lib/applyDesign';
 import { useStudio, useVars } from '../studio-context';
 import { SectionShell, Subsection, FieldGrid, VarField } from '../atoms';
 
-const COLOR_HINTS: Record<string, string> = {
-  '--chat--color--primary':
-    "Master brand colour — recolours the header, toggle button, send button, and the user's message bubble. Fine-tune any of these individually in their own tabs afterwards.",
-  '--chat--color-typing':
-    "Colour of the animated 'typing' dots shown in the bot's bubble before its reply arrives. Not visible in this static preview.",
-};
+const PRIMARY_HINT =
+  "Master brand colour — recolours the header, toggle button, send button, and the user's message bubble. Fine-tune any of these individually in their own tabs afterwards.";
 
 export function ThemeSection() {
   const { update } = useStudio();
@@ -70,7 +66,7 @@ export function ThemeSection() {
           name="--chat--color--primary"
           value={values['--chat--color--primary']}
           onChange={(v) => setVar('--chat--color--primary', v)}
-          hint={COLOR_HINTS['--chat--color--primary']}
+          hint={PRIMARY_HINT}
         />
         <VarField
           name="--chat--color-light"
@@ -78,12 +74,6 @@ export function ThemeSection() {
           onChange={(v) => setVar('--chat--color-light', v)}
         />
       </FieldGrid>
-      <VarField
-        name="--chat--color-typing"
-        value={values['--chat--color-typing']}
-        onChange={(v) => setVar('--chat--color-typing', v)}
-        hint={COLOR_HINTS['--chat--color-typing']}
-      />
     </SectionShell>
   );
 }
