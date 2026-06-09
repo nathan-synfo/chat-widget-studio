@@ -35,5 +35,18 @@ export function useVars() {
     },
     [active.cssValues, update],
   );
-  return { values, setVar };
+  // Apply several variable edits in ONE commit. Calling setVar twice in a row
+  // would clobber the first edit, because both reads see the same render's
+  // cssValues — use this when a single action changes more than one variable.
+  const setVars = useCallback(
+    (patch: Record<string, string>) => {
+      let next = active.cssValues;
+      for (const [name, value] of Object.entries(patch)) {
+        next = setCssVar(next, name, value);
+      }
+      update({ cssValues: next });
+    },
+    [active.cssValues, update],
+  );
+  return { values, setVar, setVars };
 }

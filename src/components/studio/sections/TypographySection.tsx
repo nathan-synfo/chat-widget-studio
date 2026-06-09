@@ -23,18 +23,17 @@ const FONT_OPTIONS = [
 const PRESET_VALUES = FONT_OPTIONS.map((f) => f.value);
 
 export function TypographySection() {
-  const { values, setVar } = useVars();
+  const { values, setVar, setVars } = useVars();
   const family = values['--chat--font-family'] || 'inherit';
   const fontUrl = values['--chat--font-family-url'] || '';
   const isPreset = PRESET_VALUES.includes(family);
 
   const selectFont = (value: string) => {
-    setVar('--chat--font-family', value);
-    if (value === 'inherit') {
-      setVar('--chat--font-family-url', '');
-    } else {
-      setVar('--chat--font-family-url', FONT_PRESETS[value] || '');
-    }
+    // Set family + URL in one commit; two separate setVar calls would clobber.
+    setVars({
+      '--chat--font-family': value,
+      '--chat--font-family-url': value === 'inherit' ? '' : FONT_PRESETS[value] || '',
+    });
   };
 
   return (
