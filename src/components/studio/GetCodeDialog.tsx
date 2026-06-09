@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Check, Code, Copy } from 'lucide-react';
+import { AlertTriangle, Check, Code, Copy } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -46,11 +46,21 @@ export function GetCodeDialog() {
         <DialogHeader>
           <DialogTitle>Install your widget</DialogTitle>
           <DialogDescription>
-            {hasWebhook
-              ? 'Paste this snippet just before the closing </body> tag on your site.'
-              : 'Set your n8n webhook URL in the Connect tab first, then paste this snippet before the closing </body> tag.'}
+            Paste this snippet just before the closing &lt;/body&gt; tag on your site.
           </DialogDescription>
         </DialogHeader>
+
+        {!hasWebhook && (
+          <div className="flex items-start gap-2.5 rounded-md border border-warning/30 bg-warning/10 px-3 py-2.5">
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+            <p className="text-xs leading-relaxed text-foreground/90">
+              <span className="font-semibold">No webhook URL set.</span> The snippet will use a{' '}
+              <code className="font-mono text-[11px]">YOUR_WEBHOOK_URL</code> placeholder and the chat
+              won't connect until you add your n8n webhook in the{' '}
+              <span className="font-medium text-foreground">Connect</span> tab.
+            </p>
+          </div>
+        )}
 
         <div className="relative min-w-0 overflow-hidden rounded-lg border border-border bg-black">
           <Button

@@ -1,11 +1,15 @@
+export type MockTheme = 'dark' | 'light';
+
 /**
- * A calm, dark mock website that fills the 1440×900 stage so the chat widget has
- * believable context. It must not compete with the widget.
+ * A calm mock website that fills the 1440×900 stage so the chat widget has
+ * believable context. Switchable between a dark and light canvas. It must not
+ * compete with the widget.
  */
-export function MockSite() {
-  const bg = '#0c0c10';
-  const text = '#ededf2';
-  const muted = '#7a7a85';
+export function MockSite({ theme = 'dark' }: { theme?: MockTheme }) {
+  const dark = theme === 'dark';
+  const bg = dark ? '#0c0c10' : '#fafaf9';
+  const text = dark ? '#ededf2' : '#1a1a1f';
+  const muted = dark ? '#7a7a85' : '#6b6b75';
 
   return (
     <div
