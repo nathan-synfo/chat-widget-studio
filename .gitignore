@@ -36,3 +36,7 @@ lint_output.txt
 
 # Lock files
 bun.lockb
+
+# Claude
+.claude
+CLAUDE.md

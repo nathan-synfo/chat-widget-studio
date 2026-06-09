@@ -8,10 +8,32 @@ interface ChatPreviewProps {
   logos: LogoValues;
   headerContent: HeaderContent;
   welcomeConfig: WelcomeConfig;
+  /** When true, drops the muted backdrop, dot grid and dashed outline so it can overlay a mock site. */
+  transparent?: boolean;
+  /** Controlled open state. When provided, internal open state is ignored. */
+  forcedOpen?: boolean;
+  /** Notifies parent when the open state should change (close button, toggle). */
+  onOpenChange?: (open: boolean) => void;
 }
 
-export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: ChatPreviewProps) {
-  const [isOpen, setIsOpen] = useState(false); // Default closed
+export function ChatPreview({
+  cssValues,
+  logos,
+  headerContent,
+  welcomeConfig,
+  transparent = false,
+  forcedOpen,
+  onOpenChange,
+}: ChatPreviewProps) {
+  const isControlled = forcedOpen !== undefined;
+  const [internalOpen, setInternalOpen] = useState(false); // Default closed
+  const open = isControlled ? forcedOpen! : internalOpen;
+
+  const setOpen = (next: boolean) => {
+    onOpenChange?.(next);
+    if (!isControlled) setInternalOpen(next);
+  };
+
   const [hasMessages, setHasMessages] = useState(false);
   const [userMessage, setUserMessage] = useState('');
   const [inputValue, setInputValue] = useState('');
@@ -51,38 +73,55 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
   }, [cssValues]);
 
   return (
-    <div className="h-full w-full flex items-center justify-center bg-background relative overflow-hidden">
-      {/* Background dot pattern */}
-      <div
-        className="absolute inset-0 opacity-[0.08]"
-        style={{
-          backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
-          backgroundSize: '24px 24px'
-        }}
-      />
-      {/* Radial vignette */}
-      <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background: 'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, hsl(220,20%,10%) 100%)'
-        }}
-      />
-      {/* Live Preview label */}
-      <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10 pointer-events-none">
-        <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" />
-        <span className="text-[10px] font-medium text-muted-foreground/60 tracking-widest uppercase select-none">Live Preview</span>
-      </div>
+    <div
+      className={
+        transparent
+          ? 'absolute inset-0 overflow-hidden'
+          : 'h-full w-full flex items-center justify-center bg-background relative overflow-hidden'
+      }
+    >
+      {!transparent && (
+        <>
+          {/* Background dot pattern */}
+          <div
+            className="absolute inset-0 opacity-[0.08]"
+            style={{
+              backgroundImage: `radial-gradient(circle at 1px 1px, currentColor 1px, transparent 0)`,
+              backgroundSize: '24px 24px',
+            }}
+          />
+          {/* Radial vignette */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                'radial-gradient(ellipse 80% 70% at 50% 50%, transparent 40%, hsl(220,20%,10%) 100%)',
+            }}
+          />
+          {/* Live Preview label */}
+          <div className="absolute top-3 left-3 flex items-center gap-1.5 z-10 pointer-events-none">
+            <div className="w-1.5 h-1.5 rounded-full bg-primary/70 animate-pulse" />
+            <span className="text-[10px] font-medium text-muted-foreground/60 tracking-widest uppercase select-none">
+              Live Preview
+            </span>
+          </div>
+        </>
+      )}
 
       {/* Preview container - Acts as the "Viewport" */}
       <div
         id="chat-preview-container"
-        className="relative w-full h-full pointer-events-none border border-dashed border-border/50 rounded-lg"
+        className={
+          transparent
+            ? 'relative w-full h-full pointer-events-none'
+            : 'relative w-full h-full pointer-events-none border border-dashed border-border/50 rounded-lg'
+        }
       >
         {/* IMPORTANT: ID used for Scoping CSS Variables */}
         <div className="chat-layout n8n-chat-animated absolute inset-0 pointer-events-auto">
           {/* Chat window */}
           <div
-            className={`chat-window absolute flex flex-col overflow-hidden ${isOpen ? 'is-open' : ''}`}
+            className={`chat-window absolute flex flex-col overflow-hidden ${open ? 'is-open' : ''}`}
             style={{
               width: 'var(--chat--window--width, 400px)',
               height: 'var(--chat--window--height, 600px)',
@@ -103,7 +142,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                 padding: 'var(--chat--header--padding, var(--chat--spacing))',
                 height: 'var(--chat--header-height, auto)',
                 borderTop: 'var(--chat--header--border-top, none)',
-                borderBottom: 'var(--chat--header--border-bottom, none)'
+                borderBottom: 'var(--chat--header--border-bottom, none)',
               }}
             >
               <div className="flex items-center gap-3">
@@ -120,7 +159,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                     fontSize: 'var(--chat--heading--font-size, 2em)',
                     lineHeight: 'var(--chat--heading--line-height, 1.2)',
                     margin: 0,
-                    fontWeight: 600
+                    fontWeight: 600,
                   }}>
                     {headerContent.title}
                   </h2>
@@ -128,14 +167,14 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                     fontSize: 'var(--chat--subtitle--font-size, inherit)',
                     lineHeight: 'var(--chat--subtitle--line-height, 1.2)',
                     margin: 0,
-                    opacity: 0.9
+                    opacity: 0.9,
                   }}>
                     {headerContent.subtitle}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setIsOpen(false)}
+                onClick={() => setOpen(false)}
                 className="p-1 rounded hover:opacity-80 transition-opacity"
               >
                 <X className="w-5 h-5" />
@@ -153,14 +192,14 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                     <p className="text-sm" style={{ color: 'var(--chat--welcome--subtitle-color, var(--chat--color-dark))', opacity: 0.8, fontSize: 'var(--chat--welcome--subtitle-font-size, 14px)' }}>{welcomeConfig.subtitle}</p>
                   </div>
                   <div className="flex flex-col gap-2 items-end">
-                    {welcomeConfig.pills.map(pill => (
+                    {welcomeConfig.pills.map((pill) => (
                       <button
                         key={pill.id}
                         className="text-left text-xs py-2 px-3 rounded-lg transition-all border shadow-sm hover:shadow-md flex items-center justify-between gap-2 group bg-white max-w-[85%]"
                         onClick={() => handlePillClick(pill.message)}
                         style={{
                           borderColor: 'var(--chat--color-light-shade-50, #eee)',
-                          color: 'var(--chat--color-dark)'
+                          color: 'var(--chat--color-dark)',
                         }}
                       >
                         <span className="font-medium">{pill.label}</span>
@@ -185,7 +224,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                         borderRadius: 'var(--chat--message--border-radius, var(--chat--border-radius))',
                         fontSize: 'var(--chat--message--font-size, 1rem)',
                         lineHeight: 'var(--chat--message-line-height, 1.8)',
-                        border: 'var(--chat--message--user--border, none)'
+                        border: 'var(--chat--message--user--border, none)',
                       }}
                     >
                       {userMessage}
@@ -210,7 +249,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                         borderRadius: 'var(--chat--message--border-radius, var(--chat--border-radius))',
                         fontSize: 'var(--chat--message--font-size, 1rem)',
                         lineHeight: 'var(--chat--message-line-height, 1.8)',
-                        border: 'var(--chat--message--bot--border, none)'
+                        border: 'var(--chat--message--bot--border, none)',
                       }}
                     >
                       Thanks for checking in! This is a preview of how your conversation will look.
@@ -226,7 +265,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
               style={{
                 padding: 'var(--chat--spacing, 1rem)',
                 backgroundColor: 'var(--chat--color-white, #ffffff)',
-                borderColor: 'var(--chat--color-light-shade-50, #e6e9f1)'
+                borderColor: 'var(--chat--color-light-shade-50, #e6e9f1)',
               }}
             >
               <textarea
@@ -245,7 +284,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                   borderColor: 'var(--chat--input--border-color, var(--chat--color-medium, #d2d4d9))',
                   borderRadius: 'var(--chat--input--border-radius, var(--chat--border-radius, 0.25rem))',
                   color: 'var(--chat--color-dark, #101330)',
-                  fontSize: 'var(--chat--input--font-size, 0.85rem)'
+                  fontSize: 'var(--chat--input--font-size, 0.85rem)',
                 }}
               />
               <button
@@ -256,7 +295,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                   height: '40px',
                   backgroundColor: 'var(--chat--input--send--background, var(--chat--color--primary))',
                   color: 'var(--chat--toggle--color, #ffffff)',
-                  padding: 0
+                  padding: 0,
                 }}
               >
                 <Send
@@ -264,7 +303,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
                   style={{
                     width: 'var(--chat--input--icon-size, 16px)',
                     height: 'var(--chat--input--icon-size, 16px)',
-                    margin: 0
+                    margin: 0,
                   }}
                 />
               </button>
@@ -273,7 +312,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
 
           {/* Toggle button */}
           <button
-            onClick={() => setIsOpen(!isOpen)}
+            onClick={() => setOpen(!open)}
             className="absolute rounded-full shadow-lg transition-all flex items-center justify-center overflow-hidden"
             style={{
               width: 'var(--chat--toggle--size, 64px)',
@@ -292,7 +331,7 @@ export function ChatPreview({ cssValues, logos, headerContent, welcomeConfig }: 
               e.currentTarget.style.backgroundColor = 'var(--chat--toggle--background, var(--chat--color--primary))';
             }}
           >
-            {isOpen ? (
+            {open ? (
               <ChevronDown className="w-8 h-8" />
             ) : logos.toggleIcon ? (
               <img src={logos.toggleIcon} alt="Chat" className="w-8 h-8 object-contain" />
