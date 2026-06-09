@@ -96,6 +96,22 @@ export function WelcomeSection() {
               </Field>
             </div>
           ))}
+
+          <Subsection>Quick action icons</Subsection>
+          <FieldGrid cols={2}>
+            <VarField
+              name="--chat--welcome-pill-icon-color"
+              labelOverride="Icon Color"
+              value={values['--chat--welcome-pill-icon-color']}
+              onChange={(v) => setVar('--chat--welcome-pill-icon-color', v)}
+            />
+            <VarField
+              name="--chat--welcome-pill-icon-hover-color"
+              labelOverride="Icon Hover Color"
+              value={values['--chat--welcome-pill-icon-hover-color']}
+              onChange={(v) => setVar('--chat--welcome-pill-icon-hover-color', v)}
+            />
+          </FieldGrid>
         </>
       )}
     </SectionShell>

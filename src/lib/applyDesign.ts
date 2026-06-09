@@ -17,8 +17,15 @@ export function setCssVar(
     const s = generateShades(value);
     next['--chat--color--primary-shade-50'] = s.shade50;
     next['--chat--color--primary--shade-100'] = s.shade100;
+    // Primary is the master brand colour: it recolours the brand surfaces directly.
+    // Each of these can still be fine-tuned afterwards in its own tab (until primary
+    // is changed again).
+    next['--chat--toggle--background'] = value;
     next['--chat--toggle--hover--background'] = s.shade50;
     next['--chat--toggle--active--background'] = s.shade100;
+    next['--chat--input--send--background'] = value;
+    next['--chat--header--background'] = value;
+    next['--chat--message--user--background'] = value;
   }
 
   return next;

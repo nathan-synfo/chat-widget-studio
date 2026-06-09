@@ -199,18 +199,20 @@ export function VarField({
   value,
   onChange,
   labelOverride,
+  hint,
 }: {
   name: string;
   value: string;
   onChange: (v: string) => void;
   labelOverride?: string;
+  hint?: string;
 }) {
   const variable = varByName[name];
   if (!variable) return null;
   const label = labelOverride ?? variable.label;
 
   if (variable.type === 'color') {
-    return <ColorInput label={label} value={value} onChange={onChange} variableName={name} />;
+    return <ColorInput label={label} value={value} onChange={onChange} variableName={name} hint={hint} />;
   }
 
   const cfg = SLIDER_CONFIG[name];

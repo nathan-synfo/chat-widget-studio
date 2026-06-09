@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, Info } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 
@@ -10,6 +11,7 @@ interface ColorInputProps {
   onChange: (hex: string) => void;
   variableName?: string;
   palette?: string[];
+  hint?: string;
 }
 
 /* ---------- color math ---------- */
@@ -139,7 +141,7 @@ function useDragRect(
   );
 }
 
-export function ColorInput({ label, value, onChange, variableName, palette }: ColorInputProps) {
+export function ColorInput({ label, value, onChange, variableName, palette, hint }: ColorInputProps) {
   const svRef = useRef<HTMLDivElement>(null);
   const hueRef = useRef<HTMLDivElement>(null);
   const seed = (v: string): HSV => {
@@ -192,7 +194,25 @@ export function ColorInput({ label, value, onChange, variableName, palette }: Co
   return (
     <div className="space-y-1.5">
       {label ? (
-        <Label className="text-[11px] font-medium text-muted-foreground block">{label}</Label>
+        <div className="flex items-center gap-1">
+          <Label className="text-[11px] font-medium text-muted-foreground">{label}</Label>
+          {hint ? (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  type="button"
+                  aria-label="More info"
+                  className="text-muted-foreground/50 transition-colors hover:text-muted-foreground"
+                >
+                  <Info className="h-3 w-3" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start" className="max-w-[220px] text-xs leading-relaxed">
+                {hint}
+              </TooltipContent>
+            </Tooltip>
+          ) : null}
+        </div>
       ) : null}
       <Popover>
         <PopoverTrigger asChild>

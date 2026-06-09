@@ -18,13 +18,22 @@ export function LogoUpload({ label, value, onChange, tooltip }: LogoUploadProps)
   const [mode, setMode] = useState<'upload' | 'url'>('upload');
   const [urlValue, setUrlValue] = useState('');
 
-  // Determine initial mode based on value
+  // Keep internal state in sync with the external value so the control reflects
+  // resets, new/switched designs, and undo/redo — not just its first mount.
   useEffect(() => {
-    if (value && !value.startsWith('data:')) {
+    if (value && value.startsWith('data:')) {
+      // Uploaded image: surface the Upload tab, clear any stale URL text.
+      setMode('upload');
+      setUrlValue('');
+    } else if (value) {
+      // Hosted URL: surface the URL tab and reflect the current URL.
       setMode('url');
       setUrlValue(value);
+    } else {
+      // No image (e.g. after Reset / New design): clear the URL field.
+      setUrlValue('');
     }
-  }, []);
+  }, [value]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
